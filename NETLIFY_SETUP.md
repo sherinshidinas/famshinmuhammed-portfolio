@@ -64,15 +64,31 @@ All form submissions will be:
 
 ## Troubleshooting
 
-**Forms not working?**
+**Forms not working? (404 Error)**
 - Make sure the `netlify` attribute is present on the form
+- Verify the form has a `name` attribute (e.g., `name="contact"`)
+- Ensure `form-name` hidden input matches the form name
+- **Important**: After enabling forms in Netlify, you may need to:
+  1. Redeploy your site (trigger a new deployment)
+  2. Clear browser cache
+  3. Wait a few minutes for Netlify to process the form
 - Check browser console for errors
-- Verify the form has a `name` attribute
+- Verify the form is submitting to the correct URL (should be the same page)
+
+**Form submission returns 404?**
+- This usually means Netlify hasn't detected your form yet
+- Solution: Trigger a new deployment by pushing to GitHub or manually redeploy
+- Go to Netlify Dashboard → Deploys → Trigger deploy
+- After redeployment, wait 2-3 minutes and try again
 
 **Not receiving emails?**
-- Check Netlify dashboard → Forms for submissions
-- Configure email notifications in Netlify settings
+- Check Netlify dashboard → Forms → [Your Form Name] for submissions
+- Configure email notifications in Netlify settings:
+  - Site settings → Forms → Form notifications
+  - Add notification → Email notification
+  - Enter your email: `famshinpk.htcorps@gmail.com`
 - Check spam folder
+- Note: Email notifications must be configured in Netlify dashboard, not in form HTML
 
 **Need more submissions?**
 - Upgrade to Netlify Pro ($19/month) for 1,000 submissions/month

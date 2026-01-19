@@ -12,6 +12,7 @@
       event.preventDefault();
 
       let thisForm = this;
+      let formName = thisForm.getAttribute('name') || 'contact';
       
       // Show loading state
       let loadingEl = thisForm.querySelector('.loading');
@@ -19,32 +20,50 @@
       let successEl = thisForm.querySelector('.sent-message');
       
       if (loadingEl) loadingEl.classList.add('d-block');
-      if (errorEl) errorEl.classList.remove('d-block');
+      if (errorEl) {
+        errorEl.classList.remove('d-block');
+        errorEl.innerHTML = '';
+      }
       if (successEl) successEl.classList.remove('d-block');
 
       // Prepare form data for Netlify
       let formData = new FormData(thisForm);
-      let encodedData = new URLSearchParams();
       
-      // Convert FormData to URLSearchParams for Netlify
-      for (let pair of formData.entries()) {
-        encodedData.append(pair[0], pair[1]);
+      // Ensure form-name is set
+      if (!formData.has('form-name')) {
+        formData.append('form-name', formName);
       }
       
-      // Submit to Netlify
-      fetch('/', {
+      // Convert FormData to URLSearchParams for Netlify
+      let encodedData = new URLSearchParams();
+      for (let pair of formData.entries()) {
+        // Skip bot-field in submission
+        if (pair[0] !== 'bot-field' || !pair[1]) {
+          encodedData.append(pair[0], pair[1]);
+        }
+      }
+      
+      // Submit to Netlify - use the current page path
+      let submitUrl = window.location.pathname === '/' ? '/' : window.location.pathname;
+      
+      fetch(submitUrl, {
         method: 'POST',
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: encodedData.toString()
       })
       .then(response => {
         if (loadingEl) loadingEl.classList.remove('d-block');
+        
+        // Netlify Forms returns 200 on success
         if (response.ok) {
-          // Success
+          // Show success message
           if (successEl) successEl.classList.add('d-block');
           thisForm.reset();
+        } else if (response.status === 404) {
+          // If 404, try submitting without AJAX (let browser handle it)
+          throw new Error('Form endpoint not found. Please check Netlify Forms configuration.');
         } else {
-          throw new Error('Form submission failed. Please try again.');
+          throw new Error('Form submission failed. Status: ' + response.status);
         }
       })
       .catch((error) => {
@@ -53,6 +72,7 @@
           errorEl.innerHTML = error.message || 'Something went wrong. Please try again.';
           errorEl.classList.add('d-block');
         }
+        console.error('Form submission error:', error);
       });
     });
   });
