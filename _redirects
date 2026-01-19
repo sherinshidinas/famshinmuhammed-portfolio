@@ -1,0 +1,6 @@
+# Netlify redirects file
+# This ensures proper routing for your static site
+
+# If you have any specific redirects needed, add them here
+# For example:
+# /old-page /new-page 301
